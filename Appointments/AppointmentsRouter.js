@@ -52,10 +52,12 @@ AppointmentsRouter.route('/')
 
     newAppt.user_id = req.user.id
 
-    if (!title) {
-      // logger.error('Title not entered')
-      return res.status(400).json({ error: { message: 'Title required' } })
-    }
+    for (const field of ['title', 'address', 'longitude', 'latitude', 'start_time'])
+    if (!req.body[field])
+      return res.status(400).json({
+        error: `Missing '${field}' in request body`
+      })
+
 
     AppointmentsService.createAppointment(req.app.get('db'), newAppt)
       .then(appt => {
