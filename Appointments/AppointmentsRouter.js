@@ -1,6 +1,8 @@
 const express = require('express')
 const xss = require('xss')
+const path = require('path')
 const AppointmentsService = require('./AppointmentsService')
+const { requireAuth } = require('../Middleware/requireAuth')
 
 const AppointmentsRouter = express.Router()
 const jsonParser = express.json()
@@ -14,12 +16,15 @@ const serializeAppointment = appt => ({
   start_time: xss(appt.start_time),
   end_time: xss(appt.end_time),
   description: xss(appt.description),
-  date_created: appt.date_created
+  date_created: appt.date_created,
+  user_id: appt.user_id
 })
 
 AppointmentsRouter.route('/')
+  .all(requireAuth)
   .get((req, res, next) => {
-    AppointmentsService.getAllAppointments(req.app.get('db'), 1)
+    console.log('user', req.user)
+    AppointmentsService.getAllAppointments(req.app.get('db'), req.user.id)
       .then(appts => {
         res.json(appts.map(serializeAppointment))
       })
@@ -45,14 +50,16 @@ AppointmentsRouter.route('/')
       description
     }
 
+    newAppt.user_id = req.user.id
+
     if (!title) {
-      logger.error('Title not entered')
+      // logger.error('Title not entered')
       return res.status(400).json({ error: { message: 'Title required' } })
     }
 
     AppointmentsService.createAppointment(req.app.get('db'), newAppt)
       .then(appt => {
-        logger.info(`Appointment named ${appt.title} with id ${appt.id}`)
+        // logger.info(`Appointment named ${appt.title} with id ${appt.id}`)
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${appt.id}`))
@@ -61,22 +68,25 @@ AppointmentsRouter.route('/')
       .catch(next)
   })
 
-AppointmentsRouter.route('/date/:date').get((req, res, next) => {
-  let { date } = req.params
+AppointmentsRouter.route('/date/:date')
+  .all(requireAuth)
+  .get((req, res, next) => {
+    let { date } = req.params
 
-  let from = new Date(date)
-  let to = new Date(from)
+    let from = new Date(date)
+    let to = new Date(from)
 
-  to.setDate(from.getDate() + 1)
+    to.setDate(from.getDate() + 1)
 
-  AppointmentsService.getByDate(req.app.get('db'), 1, from, to)
-    .then(appts => {
-      res.json(appts.map(serializeAppointment))
-    })
-    .catch(next)
-})
+    AppointmentsService.getByDate(req.app.get('db'), req.user.id, from, to)
+      .then(appts => {
+        res.json(appts.map(serializeAppointment))
+      })
+      .catch(next)
+  })
 
 AppointmentsRouter.route('/:id')
+  .all(requireAuth)
   .all((req, res, next) => {
     AppointmentsService.getById(req.app.get('db'), req.params.id)
       .then(appt => {

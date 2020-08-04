@@ -1,34 +1,38 @@
-require('dotenv').config();
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-const helmet = require('helmet');
-const { NODE_ENV } = require('./config');
-const AppointmentsRouter = require('../Appointments/AppointmentsRoute')
+require('dotenv').config()
+const express = require('express')
+const morgan = require('morgan')
+const cors = require('cors')
+const helmet = require('helmet')
+const { NODE_ENV } = require('./config')
+const AppointmentsRouter = require('../Appointments/AppointmentsRouter')
+const AuthRouter = require('../Auth/AuthRouter')
+const UsersRouter = require('../Users/UsersRouter')
 
-const app = express();
+const app = express()
 
-const morganSetting = NODE_ENV === 'production' ? 'tiny' : 'dev';
+const morganSetting = NODE_ENV === 'production' ? 'tiny' : 'dev'
 
-app.use(morgan(morganSetting));
-app.use(helmet());
-app.use(cors());
+app.use(morgan(morganSetting))
+app.use(helmet())
+app.use(cors())
 
 app.get('/', (req, res) => {
-    res.send("Hello, boilerplate!");
+  res.send('Hello, boilerplate!')
 })
 
 app.use('/api/appointments', AppointmentsRouter)
+app.use('/api/auth', AuthRouter)
+app.use('/api/users', UsersRouter)
 
 app.use((error, req, res, next) => {
-    let response
-    if(NODE_ENV === "production") {
-        response =  {error: {message: 'server error'}};
-    } else {
-        console.error(error);
-        response = {message: error.message, error};
-    }
-    res.status(500).json(response);
+  let response
+  if (NODE_ENV === 'production') {
+    response = { error: { message: 'server error' } }
+  } else {
+    console.error(error)
+    response = { message: error.message, error }
+  }
+  res.status(500).json(response)
 })
 
-module.exports = app;
+module.exports = app

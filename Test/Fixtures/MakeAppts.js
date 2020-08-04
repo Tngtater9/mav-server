@@ -9,7 +9,7 @@ function makeAppts () {
       startTime: '2020-07-26T18:28',
       endTime: '2020-07-26T19:28',
       description: 'Interior crocodile alligator',
-      user_id: 'user'
+      user_id: '1'
     },
     {
       id: 2,
@@ -20,7 +20,7 @@ function makeAppts () {
       startTime: '2020-07-26T20:28',
       endTime: '2020-07-26T21:28',
       description: 'She sells sea shells',
-      user_id: 'user'
+      user_id: '1'
     },
     {
       id: 3,
@@ -31,7 +31,7 @@ function makeAppts () {
       startTime: '2020-07-26T15:28',
       endTime: '2020-07-26T16:28',
       description: 'A night at the round table',
-      user_id: 'user'
+      user_id: '2'
     },
     {
       id: 4,
@@ -42,7 +42,7 @@ function makeAppts () {
       startTime: '2020-07-27T13:28',
       endTime: '2020-07-27T15:28',
       description: 'Hometown party',
-      user_id: 'user'
+      user_id: '2'
     },
     {
       id: 5,
@@ -53,7 +53,117 @@ function makeAppts () {
       startTime: '2020-07-27T17:28',
       endTime: '2020-07-27T18:28',
       description: 'A fair time',
-      user_id: 'user'
+      user_id: '3'
     }
   ]
+}
+
+function makeUsersArray () {
+  return [
+    {
+      id: 1,
+      username: 'test-user-1',
+      visible_name: 'Test user 1',
+      company: 'TU1',
+      email: 'TU1@email.com',
+      password: 'password',
+      date_created: '2029-01-22T16:28:32.615Z'
+    },
+    {
+      id: 2,
+      username: 'test-user-2',
+      visible_name: 'Test user 2',
+      company: 'TU2',
+      email: 'TU2@email.com',
+      password: 'password',
+      date_created: '2029-01-22T16:28:32.615Z'
+    },
+    {
+      id: 3,
+      username: 'test-user-3',
+      visible_name: 'Test user 3',
+      company: 'TU3',
+      email: 'TU3@email.com',
+      password: 'password',
+      date_created: '2029-01-22T16:28:32.615Z'
+    },
+    {
+      id: 4,
+      username: 'test-user-4',
+      visible_name: 'Test user 4',
+      company: 'TU4',
+      email: 'TU4@email.com',
+      password: 'password',
+      date_created: '2029-01-22T16:28:32.615Z'
+    }
+  ]
+}
+
+function seedUsers (db, users) {
+  const preppedUsers = users.map(user => ({
+    ...user,
+    password: bcrypt.hashSync(user.password, 1)
+  }))
+  return db
+    .into('mav_users')
+    .insert(preppedUsers)
+    .then(() =>
+      // update the auto sequence to stay in sync
+      db.raw(`SELECT setval('mav_users_id_seq', ?)`, [
+        users[users.length - 1].id
+      ])
+    )
+}
+
+function makeExpectedAppts (user, appts, date) {
+  let userAppts = appts
+    .filter(appt => appt.user_id === user.id)
+    .sort((a, b) => {
+      return new Date(a.start_time) - new Date(b.start_time)
+    })
+
+  return userAppts
+}
+
+function makeMaliciousAppt (user) {
+  const date = new Date().toUTCString()
+  const maliciousAppt = {
+    id: 911,
+    title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+    address: '123 Fake Street, Main, Maine 12345',
+    longitude: 10,
+    latitude: -10,
+    start_time: date,
+    end_time: date,
+    description: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+    user_id: 1
+  }
+  const expectedAppt = {
+    ...makeExpectedAppts([user], maliciousThing, date),
+    title:
+      'Naughty naughty very naughty &lt;script&gt;alert("xss");&lt;/script&gt;',
+    description: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`
+  }
+  return {
+    maliciousAppt,
+    expectedAppt
+  }
+}
+
+function cleanTables (db) {
+  return db.raw(
+    `TRUNCATE
+      appointments,
+      mav_users,
+      RESTART IDENTITY CASCADE`
+  )
+}
+
+module.exports = {
+  makeAppts,
+  makeUsersArray,
+  makeExpectedAppts,
+  makeMaliciousAppt,
+  seedUsers,
+  cleanTables
 }
