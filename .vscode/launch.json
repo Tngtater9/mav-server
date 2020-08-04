@@ -9,8 +9,7 @@
             "program": "${workspaceFolder}/src/server.js",
             "request": "launch",
             "skipFiles": [
-                "<node_internals>/**",
-                "${workspaceFolder}/node_modules"
+                "<node_internals>/**"
             ],
             "type": "pwa-node"
         },

@@ -1,8 +1,6 @@
-CREATE EXTENSION
-IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE appointments
-(
+CREATE TABLE appointments (
   id UUID DEFAULT uuid_generate_v4 () UNIQUE,
   title TEXT NOT NULL,
   address TEXT NOT NULL,
