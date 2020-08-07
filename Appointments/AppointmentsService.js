@@ -33,7 +33,7 @@ const AppointmentsService = {
       .delete()
   },
   updateAppointment (knex, id, updatedAppointment) {
-    return knex('folder')
+    return knex('appointments')
       .where('id', id)
       .update(updatedAppointment)
   }

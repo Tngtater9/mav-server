@@ -52,12 +52,17 @@ AppointmentsRouter.route('/')
 
     newAppt.user_id = req.user.id
 
-    for (const field of ['title', 'address', 'longitude', 'latitude', 'start_time'])
-    if (!req.body[field])
-      return res.status(400).json({
-        error: `Missing '${field}' in request body`
-      })
-
+    for (const field of [
+      'title',
+      'address',
+      'longitude',
+      'latitude',
+      'start_time'
+    ])
+      if (!req.body[field])
+        return res.status(400).json({
+          error: `Missing '${field}' in request body`
+        })
 
     AppointmentsService.createAppointment(req.app.get('db'), newAppt)
       .then(appt => {
@@ -108,6 +113,53 @@ AppointmentsRouter.route('/:id')
         return res.status(204).end()
       })
       .catch(next)
+  })
+  .patch(jsonParser, (req, res, next) => {
+    const { id } = req.params
+    const {
+      title,
+      address,
+      longitude,
+      latitude,
+      start_time,
+      end_time,
+      description
+    } = req.body
+    const apptToUpdate = {
+      title,
+      address,
+      longitude,
+      latitude,
+      start_time,
+      end_time,
+      description
+    }
+
+    const numberOfValues = Object.values(apptToUpdate).filter(Boolean).length
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: {
+          message: `Request body must contain at least one of the following values title,
+        address,
+        longitude,
+        latitude,
+        start_time,
+        end_time, or
+        description`
+        }
+      })
+    }
+
+    AppointmentsService.updateAppointment(
+      req.app.get('db'),
+      id,
+      apptToUpdate
+    ).then(appt => {
+      res
+        .status(204)
+        .location(path.posix.join(req.originalUrl, `/${appt.id}`))
+        .json(serializeAppointment(appt))
+    })
   })
 
 module.exports = AppointmentsRouter
