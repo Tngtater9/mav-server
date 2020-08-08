@@ -58,15 +58,14 @@ AppointmentsRouter.route('/')
       'longitude',
       'latitude',
       'start_time'
-    ])
+    ]) {
       if (!req.body[field])
         return res.status(400).json({
           error: `Missing '${field}' in request body`
         })
-
+    }
     AppointmentsService.createAppointment(req.app.get('db'), newAppt)
       .then(appt => {
-        // logger.info(`Appointment named ${appt.title} with id ${appt.id}`)
         res
           .status(201)
           .location(path.posix.join(req.originalUrl, `/${appt.id}`))
