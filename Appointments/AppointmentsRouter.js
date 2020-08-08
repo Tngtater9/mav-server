@@ -23,7 +23,6 @@ const serializeAppointment = appt => ({
 AppointmentsRouter.route('/')
   .all(requireAuth)
   .get((req, res, next) => {
-    console.log('user', req.user)
     AppointmentsService.getAllAppointments(req.app.get('db'), req.user.id)
       .then(appts => {
         res.json(appts.map(serializeAppointment))
