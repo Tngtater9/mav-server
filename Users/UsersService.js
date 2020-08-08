@@ -40,6 +40,7 @@ const UsersService = {
       id: user.id,
       username: xss(user.username),
       visible_name: xss(user.visible_name),
+      email: xss(user.email),
       company: xss(user.company),
       date_created: new Date(user.date_created)
     }
