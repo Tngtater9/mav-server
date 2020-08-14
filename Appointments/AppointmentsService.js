@@ -3,6 +3,7 @@ const AppointmentsService = {
     return knex
       .select('*')
       .where('user_id', user)
+      .orderBy('start_time')
       .from('appointments')
   },
   getByDate (knex, user, from, to) {
@@ -11,6 +12,7 @@ const AppointmentsService = {
       .where('user_id', user)
       .where('start_time', '>=', from)
       .where('start_time', '<', to)
+      .orderBy('start_time')
       .from('appointments')
   },
   getById (knex, id) {
