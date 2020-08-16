@@ -6,7 +6,7 @@ const helpers = require('./Fixtures/MakeAppts')
 describe('Auth Endpoints', function () {
   let db
 
-  const { testUsers } = helpers.makeUsersArray()
+  const testUsers = helpers.makeUsersArray()
   const testUser = testUsers[0]
 
   before('make knex instance', () => {
