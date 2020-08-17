@@ -1,6 +1,6 @@
-# Express Boilerplate!
+# MAV Server
 
-This is a boilerplate project used for starting new projects!
+This is an API made to serve the MAV client. It handles authentication through JSON web tokens on the /api/auth/login/ endpoint and refreshes tokens on /api/refresh/. Users are created on the /api/users/ endpoint. The all appointments of an authenticated user can be found at the /api/appointments/ endpoint. To get appointments for a given day of an  authenticated user use /api/appointments/date/{YYYY-MM-DD of the date to query}
 
 ## Set up
 
@@ -11,7 +11,7 @@ Complete the following steps to start a new project (NEW-PROJECT-NAME):
 3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
 4. Install the node dependencies `npm install`
 5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "mav-server",`
 
 ## Scripts
 
@@ -20,6 +20,12 @@ Start the application `npm start`
 Start nodemon for the application `npm run dev`
 
 Run the tests `npm test`
+
+Start development server `npm run dev`
+
+Migrate database `npm run migrate`
+
+Migrate test database `npm run migrate:test`
 
 ## Deploying
 
